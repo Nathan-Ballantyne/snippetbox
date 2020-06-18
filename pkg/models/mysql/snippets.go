@@ -42,7 +42,6 @@ func (m *SnippetModel) Insert(title, content, expires string) (int, error) {
 
 	// The ID returned has the type int64, so we convert it to an int type
 	// before returning.
-
 	return int(id), nil
 }
 
