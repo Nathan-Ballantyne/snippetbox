@@ -46,7 +46,9 @@ func (m *SnippetModel) Insert(title, content, expires string) (int, error) {
 // This will return a specific snippet based on its id.
 func (m *SnippetModel) Get(id int) (*models.Snippet, error) {
 	s := &models.Snippet{}
-	err := m.DB.QueryRow("SELECT ...", id).Scan(&s.ID, &s.Title, &s.Content, &s.Created, &s.Expires)
+	stmt := `SELECT id, title, content, created, expires FROM snippets    
+	WHERE expires > UTC_TIMESTAMP() AND id = ?`
+	err := m.DB.QueryRow(stmt, id).Scan(&s.ID, &s.Title, &s.Content, &s.Created, &s.Expires)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, models.ErrNoRecord
