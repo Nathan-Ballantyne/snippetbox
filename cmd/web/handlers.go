@@ -11,40 +11,34 @@ import (
 	"github.com/Nathan-Ballantyne/snippetbox/pkg/models"
 )
 
-// Change the signature of the home handler so it is defined as a method against
-// *application.
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" {
-		app.notFound(w) // Use the notFound() helper
+		app.notFound(w)
 		return
 	}
-
 	s, err := app.snippets.Latest()
 	if err != nil {
 		app.serverError(w, err)
 		return
 	}
-
-	for _, snippet := range s {
-		fmt.Fprintf(w, "%v\n", snippet)
+	// Create an instance of a templateData struct holding the slice of
+	// snippets.
+	data := &templateData{Snippets: s}
+	files := []string{
+		"./ui/html/home.page.tmpl",
+		"./ui/html/base.layout.tmpl",
+		"./ui/html/footer.partial.tmpl",
 	}
-
-	// files := []string{
-	// 	"./ui/html/home.page.tmpl",
-	// 	"./ui/html/base.layout.tmpl",
-	// 	"./ui/html/footer.partial.tmpl",
-	// }
-
-	// ts, err := template.ParseFiles(files...)
-	// if err != nil {
-	// 	app.serverError(w, err) // Use the serverError() helper.
-	// 	return
-	// }
-
-	// err = ts.Execute(w, nil)
-	// if err != nil {
-	// 	app.serverError(w, err) // Use the serverError() helper.
-	// }
+	ts, err := template.ParseFiles(files...)
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+	// Pass in the templateData struct when executing the template.
+	err = ts.Execute(w, data)
+	if err != nil {
+		app.serverError(w, err)
+	}
 }
 
 // Change the signature of the showSnippet handler so it is defined as a method
