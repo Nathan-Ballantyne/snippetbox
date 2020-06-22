@@ -7,10 +7,11 @@ import (
 	"github.com/Nathan-Ballantyne/snippetbox/pkg/models"
 )
 
-// Include a Snippets field in the templateData struct.
+// Add a CurrentYear field to the templateData struct.
 type templateData struct {
-	Snippet  *models.Snippet
-	Snippets []*models.Snippet
+	CurrentYear int
+	Snippet     *models.Snippet
+	Snippets    []*models.Snippet
 }
 
 func newTemplateCache(dir string) (map[string]*template.Template, error) {
