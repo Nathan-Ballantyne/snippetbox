@@ -6,6 +6,8 @@ import (
 
 	"net/http"
 	"strconv"
+	"strings"
+	"unicode/utf8"
 
 	"github.com/Nathan-Ballantyne/snippetbox/pkg/models"
 )
@@ -52,24 +54,43 @@ func (app *application) showSnippet(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// Change the signature of the showSnippet handler so it is defined as a method
-// against *application.
 func (app *application) createSnippet(w http.ResponseWriter, r *http.Request) {
-	// First we call r.ParseForm() which adds any data in POST request bodies
-	// to the r.PostForm map. This also works in the same way for PUT and PATCH
-	// requests. If there are any errors, we use our app.ClientError helper to send
-	// a 400 Bad Request response to the user.
 	err := r.ParseForm()
 	if err != nil {
 		app.clientError(w, http.StatusBadRequest)
 		return
 	}
 
-	// Use the r.PostForm.Get() method to retrieve the relevant data fields
-	// from the r.PostForm map.
 	title := r.PostForm.Get("title")
 	content := r.PostForm.Get("content")
 	expires := r.PostForm.Get("expires")
+
+	// Initialize a map to hold any validation errors.
+	errors := make(map[string]string)
+
+	// Check that the title field is not blank and is not more then 100 characters
+	// long. If it fails either of those checks, add a message to the errors
+	// map using the field name as the key
+	if strings.TrimSpace(title) == "" {
+		errors["title"] = "This field cannot be blank"
+	} else if utf8.RuneCountInString(title) > 100 {
+		errors["title"] = "This field is too long (maximum) is 100 characters"
+	}
+
+	// Check that the content field isn't blank and matches one of the permitted
+	// Values ("1", "7" or "365")
+	if strings.TrimSpace(expires) == "" {
+		errors["expires"] = "This field cannot be blank"
+	} else if expires != "365" && expires != "7" && expires != "1" {
+		errors["expires"] = "This field is invalid"
+	}
+
+	// If there are any errors, dump them in a plain text HTTP response and return
+	// from the handler.
+	if len(errors) > 0 {
+		fmt.Fprint(w, errors)
+		return
+	}
 
 	// Create a new snippet record in the database using the form data.
 	id, err := app.snippets.Insert(title, content, expires)
@@ -78,7 +99,6 @@ func (app *application) createSnippet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Change the redirect to use the new semantic URL style of /snippet/:id
 	http.Redirect(w, r, fmt.Sprintf("/snippet/%d", id), http.StatusSeeOther)
 }
 
