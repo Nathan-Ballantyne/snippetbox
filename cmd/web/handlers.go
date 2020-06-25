@@ -55,13 +55,23 @@ func (app *application) showSnippet(w http.ResponseWriter, r *http.Request) {
 // Change the signature of the showSnippet handler so it is defined as a method
 // against *application.
 func (app *application) createSnippet(w http.ResponseWriter, r *http.Request) {
-	// Checking if the request method is a POST is now superfluous and can be
-	// removed.
+	// First we call r.ParseForm() which adds any data in POST request bodies
+	// to the r.PostForm map. This also works in the same way for PUT and PATCH
+	// requests. If there are any errors, we use our app.ClientError helper to send
+	// a 400 Bad Request response to the user.
+	err := r.ParseForm()
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
 
-	title := "0 snail"
-	content := "0 snail\nClimb Mount Fuji, \nBut slowly!\n\n- Kobayashi Issa"
-	expires := "7"
+	// Use the r.PostForm.Get() method to retrieve the relevant data fields
+	// from the r.PostForm map.
+	title := r.PostForm.Get("title")
+	content := r.PostForm.Get("content")
+	expires := r.PostForm.Get("expires")
 
+	// Create a new snippet record in the database using the form data.
 	id, err := app.snippets.Insert(title, content, expires)
 	if err != nil {
 		app.serverError(w, err)
