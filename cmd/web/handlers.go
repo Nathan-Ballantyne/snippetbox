@@ -55,6 +55,9 @@ func (app *application) showSnippet(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) createSnippet(w http.ResponseWriter, r *http.Request) {
+
+	fieldBlankError := "This field cannot be blank"
+
 	err := r.ParseForm()
 	if err != nil {
 		app.clientError(w, http.StatusBadRequest)
@@ -72,7 +75,7 @@ func (app *application) createSnippet(w http.ResponseWriter, r *http.Request) {
 	// long. If it fails either of those checks, add a message to the errors
 	// map using the field name as the key
 	if strings.TrimSpace(title) == "" {
-		errors["title"] = "This field cannot be blank"
+		errors["title"] = fieldBlankError
 	} else if utf8.RuneCountInString(title) > 100 {
 		errors["title"] = "This field is too long (maximum) is 100 characters"
 	}
@@ -80,15 +83,19 @@ func (app *application) createSnippet(w http.ResponseWriter, r *http.Request) {
 	// Check that the content field isn't blank and matches one of the permitted
 	// Values ("1", "7" or "365")
 	if strings.TrimSpace(expires) == "" {
-		errors["expires"] = "This field cannot be blank"
+		errors["expires"] = fieldBlankError
 	} else if expires != "365" && expires != "7" && expires != "1" {
 		errors["expires"] = "This field is invalid"
 	}
 
-	// If there are any errors, dump them in a plain text HTTP response and return
-	// from the handler.
+	// If there are any validation errors, re-display the create.page.tmpl
+	// template passing in the validation errors and previously submitted
+	// r.PostForm data.
 	if len(errors) > 0 {
-		fmt.Fprint(w, errors)
+		app.render(w, r, "create.page.tmpl", &templateData{
+			FormErrors: errors,
+			FormData:   r.PostForm,
+		})
 		return
 	}
 
