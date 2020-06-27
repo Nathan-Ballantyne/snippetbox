@@ -3,6 +3,7 @@ package forms
 import (
 	"fmt"
 	"net/url"
+	"strings"
 	"unicode/utf8"
 )
 
@@ -25,6 +26,18 @@ func New(data url.Values) *Form {
 
 // Implement a Required method to check that specific fields in the form
 // data are present and not blank. If any fields fail this check, add the
+// appropriate message to the form errors.
+func (f *Form) Required(fields ...string) {
+	for _, field := range fields {
+		value := f.Get(field)
+		if strings.TrimSpace(value) == "" {
+			f.Errors.Add(field, "This field cannot be blank")
+		}
+	}
+}
+
+// Implement a MaxLength method to check that a specific field in the form
+// contains a maximum number of characters. If the check fails then add the
 // appropriate message to the form errors.
 func (f *Form) MaxLength(field string, d int) {
 	value := f.Get(field)
