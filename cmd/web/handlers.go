@@ -26,17 +26,11 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) showSnippet(w http.ResponseWriter, r *http.Request) {
-	// Pat doesn't strip the colon from the named capture key, so we need to
-	// get the value of ":id" from the query string instead of "id".
 	id, err := strconv.Atoi(r.URL.Query().Get(":id"))
 	if err != nil || id < 1 {
 		app.notFound(w)
 		return
 	}
-
-	// Use the SnippetModel object's Get method to retrieve the data for a
-	// specific record based on its ID. If no matching record is found,
-	// return a 404 Not Found response.
 	s, err := app.snippets.Get(id)
 	if err != nil {
 		if errors.Is(err, models.ErrNoRecord) {
@@ -46,16 +40,7 @@ func (app *application) showSnippet(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-
-	// Use the PopString() method to retrieve the value for the "flash" key.
-	// PopString() also deletes the key and value from the session data, so it
-	// acts like a one-time fetch. If there is no matching key in the session
-	// data this will return the empty string.
-	flash := app.session.PopString(r, "flash")
-
-	// Pass the flash message to the template
 	app.render(w, r, "show.page.tmpl", &templateData{
-		Flash:   flash,
 		Snippet: s,
 	})
 }
