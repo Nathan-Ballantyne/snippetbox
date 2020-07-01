@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/tls"
 	"database/sql"
 	"flag"
 	"html/template"
@@ -15,7 +16,6 @@ import (
 	"github.com/golangcollege/sessions"
 )
 
-// Add a new session field to the application struct.
 type application struct {
 	errorLog      *log.Logger
 	infoLog       *log.Logger
@@ -58,10 +58,20 @@ func main() {
 		templateCache: templateCache,
 	}
 
+	// Initialize a tls.Config struct to hold the non-default TLS settings we want
+	// the server to use.
+	tlsConfig := &tls.Config{
+		PreferServerCipherSuites: true,
+		CurvePreferences:         []tls.CurveID{tls.X25519, tls.CurveP256},
+	}
+
+	// Set the server's TLSConfig field to use the tlsConfig variable we just
+	// created.
 	srv := &http.Server{
-		Addr:     *addr,
-		ErrorLog: errorLog,
-		Handler:  app.routes(),
+		Addr:      *addr,
+		ErrorLog:  errorLog,
+		Handler:   app.routes(),
+		TLSConfig: tlsConfig,
 	}
 	infoLog.Printf("Starting server on %s", *addr)
 	// Use the ListenAndServeTLS() method to start the HTTPS server. We
