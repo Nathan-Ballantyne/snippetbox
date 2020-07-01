@@ -1,2 +1,2 @@
 # Dont track tls certs
-*.pem
+tls/
