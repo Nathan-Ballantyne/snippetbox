@@ -139,7 +139,7 @@ func (app *application) signupUser(w http.ResponseWriter, r *http.Request) {
 	app.session.Put(r, "flash", "Your signup was successful. Please log in.")
 
 	// And redirect the user to the login page.
-	http.Redirect(w, r, "user/login", http.StatusSeeOther)
+	http.Redirect(w, r, "/user/login", http.StatusSeeOther)
 }
 
 func (app *application) loginUserForm(w http.ResponseWriter, r *http.Request) {
