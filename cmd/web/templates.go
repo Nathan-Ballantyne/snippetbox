@@ -9,9 +9,9 @@ import (
 	"github.com/Nathan-Ballantyne/snippetbox/pkg/models"
 )
 
-// Update the templateData fields, removing the individual FormData and
-// FormErrors fields and replacing them with a single Form field.
+// Add a new CSRFToken field to the templateData.
 type templateData struct {
+	CSRFToken       string
 	CurrentYear     int
 	Flash           string
 	Form            *forms.Form
