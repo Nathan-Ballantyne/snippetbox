@@ -51,6 +51,7 @@ func main() {
 	session := sessions.New([]byte(*secret))
 	session.Lifetime = 12 * time.Hour
 	session.Secure = true // Set the secure flag on our session cookies
+	session.SameSite = http.SameSiteStrictMode
 
 	// Initialize a mysql.UserModel instance and add it to the application
 	// dependencies.
