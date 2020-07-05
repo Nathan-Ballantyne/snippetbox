@@ -19,6 +19,9 @@ func (app *application) addDefaultData(td *templateData, r *http.Request) *templ
 	td.CurrentYear = time.Now().Year()
 	// Add the flash message to the template data, if one exists.
 	td.Flash = app.session.PopString(r, "flash")
+
+	// Add the authentication status to the template data.
+	td.IsAuthenticated = app.isAuthenticated(r)
 	return td
 }
 
