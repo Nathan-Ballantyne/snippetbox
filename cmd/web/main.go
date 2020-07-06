@@ -16,6 +16,10 @@ import (
 	"github.com/golangcollege/sessions"
 )
 
+type contextKey string
+
+const contextKeyIsAuthenticated = contextKey("isAuthenticated")
+
 // Add a new users field to the application struct.
 type application struct {
 	errorLog      *log.Logger
